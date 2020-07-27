@@ -6,6 +6,7 @@ if (len(sys.argv) < 3):
     print("USAGE python " + sys.argv[0] + " <server machine> <server port>")
     exit()
 
+#Need to use DNS to do an IP look up if an IP is not specified
 machine = sys.argv[1]
 port = int(sys.argv[2])
 
@@ -21,15 +22,33 @@ except socket.error as e:
     sys.exit()
 
 option = ""
+# If we have time, let's implement error checking
 while(option != "quit"):
     option = input("ftp> ")
-    if(option == "get"):
-        filename = option.split()
-        print(filename)
-    if(option == "put"):
-        print(option)
-    if(option == "ls"):
+    if("get" in option):
+        option = option.split(" ",1)
+        fileName = option[1]
+        fileObj = open(fileName, "r")
+    if("put" in option):
+        option = option.split(" ",1)
+        fileName = option[1]
+        fileObj = open(fileName, "r")
+    if("ls" in option):
         print("ls")
-    
 
-# Print out ftp prompt and await user input to get next action
+    if('fileObj' in locals()):
+        while(1):
+            fileData = fileObj.read(65536)
+            dataSizeStr = str(len(fileData))
+            while len(dataSizeStr) < 10:
+                dataSizeStr = "0"+dataSizeStr
+            fileData = dataSizeStr + fileData
+            numSent = 0
+
+            while len(fileData) > numSent:
+                numSent += connSock.sendto(fileData.encode(),(machine,port))
+            break
+
+        print("Sent ", numSent, " bytes.")
+        del fileObj
+connSock.close()
