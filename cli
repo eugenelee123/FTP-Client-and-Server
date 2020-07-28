@@ -22,33 +22,96 @@ except socket.error as e:
     sys.exit()
 
 option = ""
+
+def get(socket,fileName):
+    
+    try:
+        socket.send("get".encode())
+    except Exception as e:
+        print("Error",e)
+        return
+    
+    # try:
+    #     socket.recv(1024)
+    #     socket.send(fileName.encode())
+    # except Exception as e:
+    #     print("Error",e)
+
+    while(1):
+        fileData = fileName.read(65536)
+        dataSizeStr = str(len(fileData))
+        while len(dataSizeStr) < 10:
+            dataSizeStr = "0"+dataSizeStr
+        fileData = dataSizeStr + fileData
+        numSent = 0
+
+        while len(fileData) > numSent:
+            numSent += socket.sendto(fileData.encode(),(machine,port))
+        break
+
+    print("Received ", numSent, " bytes.")
+    
+
+
+def put(socket,fileName):
+    
+    try:
+        socket.send("put".encode())
+    except Exception as e:
+        print("Error",e)
+        return
+    
+    # try:
+    #     connSock.recv(1024)
+    #     connSock.send(fileName.encode())
+    # except Exception as e:
+    #     print("Error",e)
+    
+    while(1):
+        fileData = fileName.read(65536)
+        dataSizeStr = str(len(fileData))
+        while len(dataSizeStr) < 10:
+            dataSizeStr = "0"+dataSizeStr
+        fileData = dataSizeStr + fileData
+        numSent = 0
+
+        while len(fileData) > numSent:
+            numSent += socket.sendto(fileData.encode(),(machine,port))
+        break
+
+    print("Sent ", numSent, " bytes.")
+
+def ls(socket):
+    try:
+        socket.send("ls".encode())
+    except Exception as e:
+        print("Error: ",e)
+        return
+
+
 # If we have time, let's implement error checking
 while(option != "quit"):
+
     option = input("ftp> ")
+
     if("get" in option):
         option = option.split(" ",1)
         fileName = option[1]
         fileObj = open(fileName, "r")
+
+        get(connSock,fileObj)
+        fileObj.close()
+
     if("put" in option):
         option = option.split(" ",1)
         fileName = option[1]
         fileObj = open(fileName, "r")
+    
+        put(connSock,fileObj)
+        fileObj.close()
+        
     if("ls" in option):
-        print("ls")
+        
+        ls(connSock)
 
-    if('fileObj' in locals()):
-        while(1):
-            fileData = fileObj.read(65536)
-            dataSizeStr = str(len(fileData))
-            while len(dataSizeStr) < 10:
-                dataSizeStr = "0"+dataSizeStr
-            fileData = dataSizeStr + fileData
-            numSent = 0
-
-            while len(fileData) > numSent:
-                numSent += connSock.sendto(fileData.encode(),(machine,port))
-            break
-
-        print("Sent ", numSent, " bytes.")
-        del fileObj
 connSock.close()
