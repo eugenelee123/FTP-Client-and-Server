@@ -88,6 +88,13 @@ def ls(socket):
         print("Error: ",e)
         return
 
+    try:
+        numFiles = int(socket.recv(40).decode())
+        print("Number of Files in Directory:",numFiles)
+    except Exception as e:
+        print(e)
+
+    
 
 # If we have time, let's implement error checking
 while(option != "quit"):

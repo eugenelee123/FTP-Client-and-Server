@@ -1,5 +1,6 @@
 import socket
 import sys
+import os
 
 if(len(sys.argv) < 2):
     print("USAGE python", sys.argv[0], " < PORT NUMBER>")
@@ -25,6 +26,23 @@ def receiveMessage(socket,numBytes):
     
     return buffer
 
+def get():
+    return
+def put():
+    return
+def ls(socket):
+
+    directoryContents = os.listdir(os.getcwd())
+    directorySize = len(directoryContents)
+    directorySize = str(directorySize) + "\n"
+    
+    socket.send(directorySize.encode())
+
+    # for i in directoryContents:
+
+
+
+
 while(1):
     clientSocket, address = welcomeSock.accept()
     print("Accepted connection from client: ", address)
@@ -34,8 +52,8 @@ while(1):
         print("get")
     elif(message == "put"):
         print("put")
-    elif(message = "ls"):
-        print("ls")
+    elif(message == "ls"):
+        ls(clientSocket)
     
     # print(clientSocket.recv(1024))
     # fileSizeBuffer = receiveMessage(clientSocket,10)
