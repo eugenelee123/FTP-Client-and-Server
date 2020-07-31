@@ -5,6 +5,7 @@ import os
 if(len(sys.argv) < 2):
     print("USAGE python", sys.argv[0], " < PORT NUMBER>")
     exit()
+DELIMITER = "%>%"
 listenPort = int(sys.argv[1])
 welcomeSock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 
@@ -36,10 +37,15 @@ def ls(socket):
     directorySize = len(directoryContents)
     directorySize = str(directorySize) + "\n"
     
+    #Send directory size
     socket.send(directorySize.encode())
 
-    # for i in directoryContents:
-
+    for sendFile in directoryContents:
+        # fileSize = sys.getsizeof(sendFile)
+        # fileSize = str(fileSize) + DELIMITER
+        # socket.send(fileSize.encode())
+        sendFile += DELIMITER
+        socket.send(sendFile.encode())
 
 
 

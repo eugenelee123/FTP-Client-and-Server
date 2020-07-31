@@ -89,12 +89,26 @@ def ls(socket):
         return
 
     try:
-        numFiles = int(socket.recv(40).decode())
+        numFiles = socket.recv(1024).decode()
+        numFiles = int(numFiles[0])
         print("Number of Files in Directory:",numFiles)
     except Exception as e:
         print(e)
+        return
 
-    
+    try:
+        fileData = socket.recv(1024)
+        fileData = str(fileData).split("%>%")
+        for i in range(numFiles):
+            print(fileData[i])
+
+    except Exception as e:
+        print(e)
+        return 
+
+    # fileName = socket.recv(fileSize)
+    # print(fileName)
+
 
 # If we have time, let's implement error checking
 while(option != "quit"):
