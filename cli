@@ -12,7 +12,7 @@ port = int(sys.argv[2])
 
 # print("Machine: ", machine)
 # print("Port: ", port)
- 
+
 #AF_INET refers to ipv4, SOCK_STREAM specifies TCP connection
 connSock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 try:
@@ -21,22 +21,26 @@ except socket.error as e:
     print("Connection failed. Reason: ", e)
     sys.exit()
 
+connSock.send(machine.encode())
+
 option = ""
 
-def get(socket,fileName):
-    
+def get(socket,option):
+
     try:
-        socket.send("get".encode())
+        socket.send(option.encode())
     except Exception as e:
         print("Error",e)
         return
-    
-    # try:
-    #     socket.recv(1024)
-    #     socket.send(fileName.encode())
-    # except Exception as e:
-    #     print("Error",e)
 
+    try:
+        message = socket.recv(1024).decode()
+        #socket.send(fileName.encode())
+    except Exception as e:
+        print("Error",e)
+
+    print("Message received:")
+    """
     while(1):
         fileData = fileName.read(65536)
         dataSizeStr = str(len(fileData))
@@ -50,23 +54,24 @@ def get(socket,fileName):
         break
 
     print("Received ", numSent, " bytes.")
-    
+    """
+    print(message)
 
 
 def put(socket,fileName):
-    
+
     try:
         socket.send("put".encode())
     except Exception as e:
         print("Error",e)
         return
-    
+
     # try:
     #     connSock.recv(1024)
     #     connSock.send(fileName.encode())
     # except Exception as e:
     #     print("Error",e)
-    
+
     while(1):
         fileData = fileName.read(65536)
         dataSizeStr = str(len(fileData))
@@ -104,7 +109,7 @@ def ls(socket):
 
     except Exception as e:
         print(e)
-        return 
+        return
 
     # fileName = socket.recv(fileSize)
     # print(fileName)
@@ -116,23 +121,18 @@ while(option != "quit"):
     option = input("ftp> ")
 
     if("get" in option):
-        option = option.split(" ",1)
-        fileName = option[1]
-        fileObj = open(fileName, "r")
-
-        get(connSock,fileObj)
-        fileObj.close()
+        get(connSock,option)
 
     if("put" in option):
         option = option.split(" ",1)
         fileName = option[1]
         fileObj = open(fileName, "r")
-    
+
         put(connSock,fileObj)
         fileObj.close()
-        
+
     if("ls" in option):
-        
+
         ls(connSock)
 
 connSock.close()
