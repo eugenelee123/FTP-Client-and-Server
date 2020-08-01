@@ -1,6 +1,7 @@
 import socket
 import os
 import sys
+from functools import partial
 
 if (len(sys.argv) < 3):
     print("USAGE python " + sys.argv[0] + " <server machine> <server port>")
@@ -21,58 +22,60 @@ except socket.error as e:
     print("Connection failed. Reason: ", e)
     sys.exit()
 
-connSock.send(machine.encode())
-
 option = ""
 
 def get(socket,option):
-
+    # Tell the server we are using the get function
     try:
         socket.send(option.encode())
     except Exception as e:
         print("Error",e)
         return
 
+    # Receive the file size
     try:
         counter = socket.recv(64).decode()
     except Exception as e:
         print("Error",e)
 
+    # Allow the server to continue
     socket.send('go ahead'.encode())
 
+    # Receive and display the file by chunks
     print("Message received:")
-    print(counter)
+    print(counter, " chunks")
     for i in range(int(counter)):
         print(socket.recv(64))
 
 
-def put(socket,fileName):
+def put(socket,option):
+  # Signal to the server that we are using the put function
+  socket.send(option.encode())
 
-    try:
-        socket.send("put".encode())
-    except Exception as e:
-        print("Error",e)
-        return
+  # Wait for server to get ready to continue
+  socket.recv(1024).decode()
 
-    # try:
-    #     connSock.recv(1024)
-    #     connSock.send(fileName.encode())
-    # except Exception as e:
-    #     print("Error",e)
+  option = option.split(" ",1)
+  fileName = option[1]
+  fileObj = open(fileName, "rb")
 
-    while(1):
-        fileData = fileName.read(65536)
-        dataSizeStr = str(len(fileData))
-        while len(dataSizeStr) < 10:
-            dataSizeStr = "0"+dataSizeStr
-        fileData = dataSizeStr + fileData
-        numSent = 0
+  # Find file size
+  counter = 0
+  for chunk in iter(partial(fileObj.read, 64), b''):
+      counter += 1
 
-        while len(fileData) > numSent:
-            numSent += socket.sendto(fileData.encode(),(machine,port))
-        break
+  # Send file size to server
+  socket.send(str(counter).encode())
+  fileObj.close()
 
-    print("Sent ", numSent, " bytes.")
+  # Wait for server to get ready
+  socket.recv(1024).decode()
+
+  # Send file info in chunks
+  fileObj = open(fileName, "rb")
+  for chunk in iter(partial(fileObj.read, 64), b''):
+      socket.send(chunk)
+  fileObj.close()
 
 def ls(socket):
     try:
@@ -112,12 +115,7 @@ while(option != "quit"):
         get(connSock,option)
 
     if("put" in option):
-        option = option.split(" ",1)
-        fileName = option[1]
-        fileObj = open(fileName, "r")
-
-        put(connSock,fileObj)
-        fileObj.close()
+        put(connSock, option)
 
     if("ls" in option):
 
