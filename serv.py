@@ -1,6 +1,7 @@
 import socket
 import sys
 import os
+from functools import partial
 
 if(len(sys.argv) < 2):
     print("USAGE python", sys.argv[0], " < PORT NUMBER>")
@@ -30,13 +31,23 @@ def receiveMessage(socket,numBytes):
 def get(message, clientSocket, machine):
     message = message.split(" ",1)
     fileName = message[1]
-    fileObj = open(fileName, "r")
+    fileObj = open(fileName, "rb")
 
-    fileData = fileObj.read(65536)
-
-    clientSocket.sendto(fileData.encode(),(machine,listenPort))
-
+    counter = 0
+    for chunk in iter(partial(fileObj.read, 64), b''):
+        counter += 1
+    clientSocket.send(str(counter).encode())
     fileObj.close()
+
+    # Get a go ahead to continue
+    clientSocket.recv(1024).decode()
+
+    fileObj = open(fileName, "rb")
+    for chunk in iter(partial(fileObj.read, 64), b''):
+        #clientSocket.sendto(str(chunk).encode(),(machine,listenPort))
+        clientSocket.send(chunk)
+    fileObj.close()
+
 
 def put():
     return

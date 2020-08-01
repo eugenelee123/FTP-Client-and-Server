@@ -34,28 +34,16 @@ def get(socket,option):
         return
 
     try:
-        message = socket.recv(1024).decode()
-        #socket.send(fileName.encode())
+        counter = socket.recv(64).decode()
     except Exception as e:
         print("Error",e)
 
+    socket.send('go ahead'.encode())
+
     print("Message received:")
-    """
-    while(1):
-        fileData = fileName.read(65536)
-        dataSizeStr = str(len(fileData))
-        while len(dataSizeStr) < 10:
-            dataSizeStr = "0"+dataSizeStr
-        fileData = dataSizeStr + fileData
-        numSent = 0
-
-        while len(fileData) > numSent:
-            numSent += socket.sendto(fileData.encode(),(machine,port))
-        break
-
-    print("Received ", numSent, " bytes.")
-    """
-    print(message)
+    print(counter)
+    for i in range(int(counter)):
+        print(socket.recv(64))
 
 
 def put(socket,fileName):
