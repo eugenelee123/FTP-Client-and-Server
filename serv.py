@@ -30,9 +30,9 @@ def receiveMessage(socket,numBytes):
 
 def get(message, clientSocket):
     message = message.split(" ",1)
-    fileName = message[1]
+    fileName = message[1]    
     fileObj = open(fileName, "rb")
-
+    
     # Get file size
     counter = 0
     for chunk in iter(partial(fileObj.read, 64), b''):
@@ -50,7 +50,6 @@ def get(message, clientSocket):
     for chunk in iter(partial(fileObj.read, 64), b''):
         clientSocket.send(chunk)
     fileObj.close()
-
 
 def put(socket):
     # Let the client continue
@@ -87,8 +86,8 @@ def ls(socket):
 
 clientSocket, address = welcomeSock.accept()
 print("Accepted connection from client: ", address)
-
 while(1):
+
     message = clientSocket.recv(1024).decode()
     if("get" in message):
         get(message, clientSocket)
@@ -98,8 +97,3 @@ while(1):
     elif(message == "ls"):
         ls(clientSocket)
         print("Sent directory info")
-
-    # print(clientSocket.recv(1024))
-    # fileSizeBuffer = receiveMessage(clientSocket,10)
-    # fileSize = int(fileSizeBuffer)
-    # print("File Size: ",fileSize)
