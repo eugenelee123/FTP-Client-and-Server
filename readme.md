@@ -1,5 +1,6 @@
 Contributors: \
 Eugene Lee eugene097@csu.fullerton.edu
+Bradley Keizer brad14@csu.fullerton.edu
 
 Language:
 Python
